@@ -1,0 +1,76 @@
+import 'package:flutter/material.dart';
+import '../models/models.dart';
+import '../services/api_service.dart';
+
+class WeaponProvider with ChangeNotifier {
+  List<Weapon> _weapons = [];
+  Map<int, int> _cart = {}; // weaponId -> quantity
+
+  List<Weapon> get weapons => _weapons;
+  Map<int, int> get cart => _cart;
+
+  double get cartTotal {
+    double total = 0;
+    _cart.forEach((id, qty) {
+      final w = _weapons.firstWhere((element) => element.id == id);
+      total += w.price * qty;
+    });
+    return total;
+  }
+
+  Future<void> fetchWeapons() async {
+    _weapons = await ApiService.getWeapons();
+    notifyListeners();
+  }
+
+  void addToCart(Weapon weapon) {
+    if (_cart.containsKey(weapon.id)) {
+      _cart[weapon.id] = _cart[weapon.id]! + 1;
+    } else {
+      _cart[weapon.id] = 1;
+    }
+    notifyListeners();
+  }
+
+  void removeFromCart(int id) {
+    _cart.remove(id);
+    notifyListeners();
+  }
+
+  void clearCart() {
+    _cart.clear();
+    notifyListeners();
+  }
+
+  Future<String?> checkout(String token) async {
+    if (_cart.isEmpty) return 'Cart is empty';
+    final items = _cart.entries.map((e) => {'weapon_id': e.key, 'quantity': e.value}).toList();
+    try {
+      final res = await ApiService.buy(items, token);
+      if (res['message'] == 'Purchase successful') {
+        _cart.clear();
+        await fetchWeapons();
+        return null;
+      }
+      return res['message'];
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  // Admin CRUD
+  Future<void> addWeapon(Weapon weapon, String token) async {
+    await ApiService.createWeapon(weapon, token);
+    await fetchWeapons();
+  }
+
+  Future<void> editWeapon(int id, Weapon weapon, String token) async {
+    await ApiService.updateWeapon(id, weapon, token);
+    await fetchWeapons();
+  }
+
+  Future<void> deleteWeapon(int id, String token) async {
+    await ApiService.deleteWeapon(id, token);
+    await fetchWeapons();
+  }
+}
