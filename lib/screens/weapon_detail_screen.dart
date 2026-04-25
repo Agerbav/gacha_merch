@@ -6,59 +6,156 @@ import '../providers/weapon_provider.dart';
 class WeaponDetailScreen extends StatelessWidget {
   final Weapon weapon;
 
-  WeaponDetailScreen({required this.weapon});
+  const WeaponDetailScreen({super.key, required this.weapon});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(weapon.name)),
+      backgroundColor: Colors.white,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 300,
+              height: 400,
               width: double.infinity,
-              color: Colors.grey[300],
-              child: Icon(Icons.image, size: 100, color: Colors.grey),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+              ),
+              child: Center(
+                child: Hero(
+                  tag: 'weapon-${weapon.id}',
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Icon(Icons.shield, size: 160, color: Colors.grey.shade300),
+                  ),
+                ),
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(weapon.name, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                      Text('\$${weapon.price}', style: TextStyle(fontSize: 20, color: Colors.blue[900], fontWeight: FontWeight.bold)),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              weapon.name, 
+                              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5)
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                weapon.type.toUpperCase(),
+                                style: TextStyle(
+                                  color: Colors.amber.shade900, 
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '\$${weapon.price}', 
+                        style: TextStyle(
+                          fontSize: 28, 
+                          color: Theme.of(context).colorScheme.primary, 
+                          fontWeight: FontWeight.w900
+                        )
+                      ),
                     ],
                   ),
-                  SizedBox(height: 10),
-                  Chip(label: Text(weapon.type), backgroundColor: Colors.amber[100]),
-                  SizedBox(height: 10),
-                  Text('Stock: ${weapon.stock}', style: TextStyle(color: weapon.stock > 0 ? Colors.green : Colors.red)),
-                  SizedBox(height: 20),
-                  Text('Description', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  SizedBox(height: 10),
-                  Text(weapon.description),
-                  SizedBox(height: 40),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: weapon.stock > 0 
-                        ? () {
-                            context.read<WeaponProvider>().addToCart(weapon);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added ${weapon.name} to cart')));
-                          }
-                        : null,
-                      child: Text('Add to Cart'),
+                  const SizedBox(height: 32),
+                  Row(
+                    children: [
+                      _buildInfoChip(Icons.inventory_2_outlined, '${weapon.stock} in stock', weapon.stock > 0 ? Colors.green : Colors.red),
+                      const SizedBox(width: 12),
+                      _buildInfoChip(Icons.star_outline_rounded, 'Legendary', Colors.blue),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Description', 
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    weapon.description,
+                    style: TextStyle(
+                      fontSize: 16, 
+                      color: Colors.grey.shade700,
+                      height: 1.6,
                     ),
-                  )
+                  ),
+                  const SizedBox(height: 120), // Spacing for bottom button
                 ],
               ),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))
+          ],
+        ),
+        child: SafeArea(
+          child: ElevatedButton(
+            onPressed: weapon.stock > 0 
+              ? () {
+                  context.read<WeaponProvider>().addToCart(weapon);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${weapon.name} added to cart'),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    )
+                  );
+                }
+              : null,
+            child: const Text('Add to Shopping Bag'),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
+        ],
       ),
     );
   }

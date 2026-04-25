@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/models.dart';
@@ -79,13 +78,16 @@ class AuthProvider with ChangeNotifier {
       final String? idToken = googleAuth.idToken;
       final String? accessToken = googleAuth.accessToken;
 
-      debugPrint('Google Auth Response: idToken=${idToken != null ? "present" : "NULL"}, accessToken=${accessToken != null ? "present" : "NULL"}');
+      debugPrint('Google Auth Response: idToken=${idToken != null ? "present (${idToken.length} chars)" : "NULL"}, accessToken=${accessToken != null ? "present" : "NULL"}');
 
-      if (idToken == null) {
-        return 'Failed to get ID Token from Google. Ensure you have correctly configured google-services.json for Android or authorized your origin for Web.';
+      if (idToken == null && accessToken == null) {
+        return 'Failed to get authentication tokens from Google.';
       }
 
-      final res = await ApiService.googleLogin(idToken);
+      debugPrint('Calling backend googleLogin with: idToken=${idToken != null ? "YES" : "NO"}, accessToken=${accessToken != null ? "YES" : "NO"}');
+      final res = await ApiService.googleLogin(idToken, accessToken);
+      debugPrint('Backend Response: $res');
+      
       if (res['token'] != null) {
         _user = User.fromJson(res['user'], token: res['token']);
         final prefs = await SharedPreferences.getInstance();

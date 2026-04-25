@@ -50,11 +50,15 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  static Future<Map<String, dynamic>> googleLogin(String idToken) async {
+  static Future<Map<String, dynamic>> googleLogin(String? idToken, String? accessToken) async {
+    debugPrint('POST to: $baseUrl/auth/google');
     final response = await http.post(
       Uri.parse('$baseUrl/auth/google'),
       headers: _headers(null),
-      body: jsonEncode({'idToken': idToken}),
+      body: jsonEncode({
+        'idToken': idToken,
+        'accessToken': accessToken,
+      }),
     );
     return _handleResponse(response);
   }

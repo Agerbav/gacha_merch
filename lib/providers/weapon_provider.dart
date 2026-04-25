@@ -4,10 +4,12 @@ import '../services/api_service.dart';
 
 class WeaponProvider with ChangeNotifier {
   List<Weapon> _weapons = [];
-  Map<int, int> _cart = {}; // weaponId -> quantity
+  final Map<int, int> _cart = {}; // weaponId -> quantity
+  bool _isLoading = false;
 
   List<Weapon> get weapons => _weapons;
   Map<int, int> get cart => _cart;
+  bool get isLoading => _isLoading;
 
   double get cartTotal {
     double total = 0;
@@ -19,8 +21,16 @@ class WeaponProvider with ChangeNotifier {
   }
 
   Future<void> fetchWeapons() async {
-    _weapons = await ApiService.getWeapons();
+    _isLoading = true;
     notifyListeners();
+    try {
+      _weapons = await ApiService.getWeapons();
+    } catch (e) {
+      debugPrint('Error fetching weapons: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void addToCart(Weapon weapon) {
