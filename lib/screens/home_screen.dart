@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/weapon_provider.dart';
+import '../providers/theme_provider.dart';
 import 'weapon_detail_screen.dart';
 import 'cart_screen.dart';
 import 'admin_screen.dart';
@@ -24,6 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final weaponProv = context.watch<WeaponProvider>();
+    final themeProv = context.watch<ThemeProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -33,10 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Teyvat Market', style: Theme.of(context).textTheme.titleLarge),
-            Text('Find your legendary weapon', style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.normal)),
+            Text('Find your legendary weapon', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontWeight: FontWeight.normal)),
           ],
         ),
         actions: [
+          IconButton(
+            icon: Icon(themeProv.themeMode == ThemeMode.dark ? Icons.light_mode_rounded : Icons.dark_mode_outlined),
+            onPressed: () => themeProv.toggleTheme(),
+          ),
           if (auth.isAdmin)
             IconButton(
               icon: const Icon(Icons.admin_panel_settings_outlined), 
@@ -101,11 +108,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => WeaponDetailScreen(weapon: weapon))),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -121,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 width: double.infinity,
                                 margin: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F5F7),
+                                  color: isDark ? Colors.white.withOpacity(0.05) : const Color(0xFFF5F5F7),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Hero(
@@ -147,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: isDark ? const Color(0xFF2C2C2E) : Colors.white.withOpacity(0.9),
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)
@@ -155,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   child: Text(
                                     weapon.type.toUpperCase(),
-                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.blueGrey.shade800, letterSpacing: 0.5),
+                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: isDark ? Colors.blue.shade300 : Colors.blueGrey.shade800, letterSpacing: 0.5),
                                   ),
                                 ),
                               ),
@@ -219,9 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     style: OutlinedButton.styleFrom(
                                       minimumSize: const Size(0, 44),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                      side: BorderSide(color: Colors.grey.shade300),
+                                      side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade300),
                                     ),
-                                    child: Text('Manage', style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade700, fontWeight: FontWeight.bold)),
+                                    child: Text('Manage', style: TextStyle(fontSize: 13, color: isDark ? Colors.blue.shade300 : Colors.blueGrey.shade700, fontWeight: FontWeight.bold)),
                                   ),
                                 )
                             ],
@@ -237,8 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showFilterDialog(context),
-        backgroundColor: Colors.white,
-        foregroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: isDark ? const Color(0xFF1E88E5) : Colors.white,
+        foregroundColor: isDark ? Colors.white : Theme.of(context).colorScheme.primary,
         elevation: 4,
         child: const Icon(Icons.filter_list_rounded),
       ),
@@ -248,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showFilterDialog(BuildContext context) {
     final weaponProv = context.read<WeaponProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final nameController = TextEditingController(text: weaponProv.searchQuery);
     final minPriceController = TextEditingController(text: weaponProv.minPrice?.toString() ?? '');
     final maxPriceController = TextEditingController(text: weaponProv.maxPrice?.toString() ?? '');
@@ -256,6 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Padding(
@@ -285,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   prefixIcon: const Icon(Icons.search_rounded),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
                 ),
               ),
               const SizedBox(height: 20),
