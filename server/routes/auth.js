@@ -10,7 +10,6 @@ const { JWT_SECRET } = require('../middlewares/auth');
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-// Local Register
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     try {
@@ -22,7 +21,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Local Login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -37,10 +35,9 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Login failed', error: error.message });
     }
 });
-// Google OAuth Login
+
 router.post('/google', async (req, res) => {
     const { idToken, accessToken } = req.body;
-    console.log('Received Google tokens:', { idToken: !!idToken, accessToken: !!accessToken });
     try {
         let external_id, email, username;
 
@@ -54,8 +51,6 @@ router.post('/google', async (req, res) => {
             email = payload.email;
             username = payload.name;
         } else if (accessToken) {
-            // Use axios to fetch userinfo with the access token
-            console.log('Fetching userinfo using accessToken via axios...');
             const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -65,13 +60,12 @@ router.post('/google', async (req, res) => {
             external_id = payload.sub;
             email = payload.email;
             username = payload.name;
-            console.log('Userinfo retrieved:', { email, username });
         } else {
             return res.status(400).json({ message: 'No token provided' });
         }
 
         if (!email) {
-            return res.status(400).json({ message: 'Email not provided by Google' });
+            return res.status(400).json({ message: 'Email not provided' });
         }
 
         let [users] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
@@ -88,14 +82,6 @@ router.post('/google', async (req, res) => {
         const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
         res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
     } catch (error) {
-        console.error('--- Google OAuth Error Detail ---');
-        console.error('Error Object:', error);
-        console.error('Error Message:', error.message);
-        console.error('Error Stack:', error.stack);
-        if (error.message.includes('audience mismatch')) {
-            console.error('CLIENT ID MISMATCH: The ID Token audience does not match GOOGLE_CLIENT_ID in your .env');
-            console.error('Expected (from .env):', GOOGLE_CLIENT_ID);
-        }
         res.status(500).json({ message: 'OAuth failed', error: error.message });
     }
 });

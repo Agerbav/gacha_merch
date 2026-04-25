@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 
 class WeaponProvider with ChangeNotifier {
   List<Weapon> _weapons = [];
+  List<Category> _categories = [];
   final Map<int, int> _cart = {}; // weaponId -> quantity
   bool _isLoading = false;
 
   List<Weapon> get weapons => _weapons;
+  List<Category> get categories => _categories;
   Map<int, int> get cart => _cart;
   bool get isLoading => _isLoading;
 
@@ -24,9 +27,14 @@ class WeaponProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _weapons = await ApiService.getWeapons();
+      final results = await Future.wait([
+        ApiService.getWeapons(),
+        ApiService.getCategories(),
+      ]);
+      _weapons = results[0] as List<Weapon>;
+      _categories = results[1] as List<Category>;
     } catch (e) {
-      debugPrint('Error fetching weapons: $e');
+      debugPrint('Error fetching data: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -69,18 +77,33 @@ class WeaponProvider with ChangeNotifier {
   }
 
   // Admin CRUD
-  Future<void> addWeapon(Weapon weapon, String token) async {
-    await ApiService.createWeapon(weapon, token);
+  Future<void> addWeapon(Weapon weapon, String token, {XFile? imageFile}) async {
+    await ApiService.createWeapon(weapon, token, imageFile: imageFile);
     await fetchWeapons();
   }
 
-  Future<void> editWeapon(int id, Weapon weapon, String token) async {
-    await ApiService.updateWeapon(id, weapon, token);
+  Future<void> editWeapon(int id, Weapon weapon, String token, {XFile? imageFile}) async {
+    await ApiService.updateWeapon(id, weapon, token, imageFile: imageFile);
     await fetchWeapons();
   }
 
   Future<void> deleteWeapon(int id, String token) async {
     await ApiService.deleteWeapon(id, token);
+    await fetchWeapons();
+  }
+
+  Future<void> addCategory(String name, String token) async {
+    await ApiService.createCategory(name, token);
+    await fetchWeapons();
+  }
+
+  Future<void> editCategory(int id, String name, String token) async {
+    await ApiService.updateCategory(id, name, token);
+    await fetchWeapons();
+  }
+
+  Future<void> deleteCategory(int id, String token) async {
+    await ApiService.deleteCategory(id, token);
     await fetchWeapons();
   }
 }

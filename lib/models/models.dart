@@ -18,10 +18,25 @@ class User {
   }
 }
 
+class Category {
+  final int id;
+  final String name;
+
+  Category({required this.id, required this.name});
+
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
+}
+
 class Weapon {
   final int id;
   final String name;
-  final String type;
+  final String type; // This will still hold the category name for display
+  final int categoryId;
   final String description;
   final int stock;
   final String image;
@@ -31,6 +46,7 @@ class Weapon {
     required this.id,
     required this.name,
     required this.type,
+    required this.categoryId,
     required this.description,
     required this.stock,
     required this.image,
@@ -41,7 +57,8 @@ class Weapon {
     return Weapon(
       id: json['id'],
       name: json['name'],
-      type: json['type'],
+      type: json['category_name'] ?? json['type'] ?? '',
+      categoryId: json['category_id'] ?? 0,
       description: json['description'] ?? '',
       stock: json['stock'],
       image: json['image'] ?? '',
@@ -52,7 +69,7 @@ class Weapon {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'type': type,
+      'category_id': categoryId,
       'description': description,
       'stock': stock,
       'image': image,

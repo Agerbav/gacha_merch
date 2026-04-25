@@ -1,15 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/models.dart';
+import '../providers/auth_provider.dart';
 import '../providers/weapon_provider.dart';
 
-class WeaponDetailScreen extends StatelessWidget {
+class WeaponDetailScreen extends StatefulWidget {
   final Weapon weapon;
 
   const WeaponDetailScreen({super.key, required this.weapon});
 
   @override
+  State<WeaponDetailScreen> createState() => _WeaponDetailScreenState();
+}
+
+class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _priceController;
+  late TextEditingController _stockController;
+  late TextEditingController _descController;
+  int? _selectedCategoryId;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.weapon.name);
+    _priceController = TextEditingController(text: widget.weapon.price.toString());
+    _stockController = TextEditingController(text: widget.weapon.stock.toString());
+    _descController = TextEditingController(text: widget.weapon.description);
+    _selectedCategoryId = widget.weapon.categoryId;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    _stockController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final weaponProv = context.watch<WeaponProvider>();
+    // If the weapon was updated, it might have been replaced in the provider.
+    // However, since we passed it in, we'll just use the widget.weapon for now.
+    // To be safer, we could find the latest version from the provider.
+    final currentWeapon = weaponProv.weapons.firstWhere((w) => w.id == widget.weapon.id, orElse: () => widget.weapon);
+
     return Scaffold(
       backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
@@ -30,10 +68,15 @@ class WeaponDetailScreen extends StatelessWidget {
               ),
               child: Center(
                 child: Hero(
-                  tag: 'weapon-${weapon.id}',
+                  tag: 'weapon-${currentWeapon.id}',
                   child: Material(
                     color: Colors.transparent,
-                    child: Icon(Icons.shield, size: 160, color: Colors.grey.shade300),
+                    child: currentWeapon.image.isNotEmpty 
+                      ? ClipRRect(
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+                          child: Image.network(currentWeapon.image, width: double.infinity, height: 400, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.shield, size: 160, color: Colors.grey.shade300)),
+                        )
+                      : Icon(Icons.shield, size: 160, color: Colors.grey.shade300),
                   ),
                 ),
               ),
@@ -52,7 +95,7 @@ class WeaponDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              weapon.name, 
+                              currentWeapon.name, 
                               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5)
                             ),
                             const SizedBox(height: 8),
@@ -63,7 +106,7 @@ class WeaponDetailScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                weapon.type.toUpperCase(),
+                                currentWeapon.type.toUpperCase(),
                                 style: TextStyle(
                                   color: Colors.amber.shade900, 
                                   fontWeight: FontWeight.bold,
@@ -76,7 +119,7 @@ class WeaponDetailScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '\$${weapon.price}', 
+                        '\$${currentWeapon.price}', 
                         style: TextStyle(
                           fontSize: 28, 
                           color: Theme.of(context).colorScheme.primary, 
@@ -88,7 +131,7 @@ class WeaponDetailScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   Row(
                     children: [
-                      _buildInfoChip(Icons.inventory_2_outlined, '${weapon.stock} in stock', weapon.stock > 0 ? Colors.green : Colors.red),
+                      _buildInfoChip(Icons.inventory_2_outlined, '${currentWeapon.stock} in stock', currentWeapon.stock > 0 ? Colors.green : Colors.red),
                       const SizedBox(width: 12),
                       _buildInfoChip(Icons.star_outline_rounded, 'Legendary', Colors.blue),
                     ],
@@ -100,7 +143,7 @@ class WeaponDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    weapon.description,
+                    currentWeapon.description,
                     style: TextStyle(
                       fontSize: 16, 
                       color: Colors.grey.shade700,
@@ -114,30 +157,108 @@ class WeaponDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))
-          ],
-        ),
-        child: SafeArea(
-          child: ElevatedButton(
-            onPressed: weapon.stock > 0 
-              ? () {
-                  context.read<WeaponProvider>().addToCart(weapon);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${weapon.name} added to cart'),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    )
-                  );
-                }
-              : null,
-            child: const Text('Add to Shopping Bag'),
+      bottomNavigationBar: Consumer<AuthProvider>(
+        builder: (context, auth, _) => Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))
+            ],
           ),
+          child: SafeArea(
+            child: auth.isAdmin 
+              ? ElevatedButton.icon(
+                  onPressed: () => _showEditDialog(context),
+                  icon: const Icon(Icons.edit_rounded),
+                  label: const Text('Edit Weapon Details'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey.shade800,
+                  ),
+                )
+              : ElevatedButton(
+                  onPressed: currentWeapon.stock > 0 
+                    ? () {
+                        context.read<WeaponProvider>().addToCart(currentWeapon);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${currentWeapon.name} added to cart'),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          )
+                        );
+                      }
+                    : null,
+                  child: const Text('Add to Shopping Bag'),
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context) {
+    final weaponProv = context.read<WeaponProvider>();
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: const Text('Edit Weapon', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 8),
+                  TextFormField(controller: _nameController, decoration: const InputDecoration(labelText: 'Name'), validator: (v) => v!.isEmpty ? 'Required' : null),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<int>(
+                    value: _selectedCategoryId,
+                    decoration: const InputDecoration(labelText: 'Weapon Type'),
+                    items: weaponProv.categories.map((cat) => DropdownMenuItem(
+                      value: cat.id,
+                      child: Text(cat.name),
+                    )).toList(),
+                    onChanged: (v) => setState(() => _selectedCategoryId = v),
+                    validator: (v) => v == null ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(controller: _priceController, decoration: const InputDecoration(labelText: 'Price'), keyboardType: TextInputType.number, validator: (v) => double.tryParse(v ?? '') == null ? 'Invalid' : null),
+                  const SizedBox(height: 12),
+                  TextFormField(controller: _stockController, decoration: const InputDecoration(labelText: 'Stock'), keyboardType: TextInputType.number, validator: (v) => int.tryParse(v ?? '') == null ? 'Invalid' : null),
+                  const SizedBox(height: 12),
+                  TextFormField(controller: _descController, decoration: const InputDecoration(labelText: 'Description'), maxLines: 3),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  final updatedWeapon = Weapon(
+                    id: widget.weapon.id,
+                    name: _nameController.text,
+                    type: '', // Set by DB
+                    categoryId: _selectedCategoryId!,
+                    price: double.parse(_priceController.text),
+                    stock: int.parse(_stockController.text),
+                    description: _descController.text,
+                    image: widget.weapon.image,
+                  );
+                  final auth = context.read<AuthProvider>();
+                  await context.read<WeaponProvider>().editWeapon(widget.weapon.id, updatedWeapon, auth.user!.token!);
+                  if (mounted) Navigator.pop(context);
+                }
+              }, 
+              style: ElevatedButton.styleFrom(minimumSize: const Size(100, 45)),
+              child: const Text('Save Changes'),
+            ),
+          ],
         ),
       ),
     );

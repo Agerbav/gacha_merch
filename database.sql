@@ -11,15 +11,21 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS weapons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    type VARCHAR(255) NOT NULL,
+    category_id INT NOT NULL,
     description TEXT,
     stock INT NOT NULL DEFAULT 0,
     image VARCHAR(255),
     price DECIMAL(10, 2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
@@ -39,6 +45,9 @@ CREATE TABLE IF NOT EXISTS transaction_items (
     FOREIGN KEY (transaction_id) REFERENCES transactions(id),
     FOREIGN KEY (weapon_id) REFERENCES weapons(id)
 );
+
+-- Initial Categories
+INSERT IGNORE INTO categories (name) VALUES ('Sword'), ('Claymore'), ('Polearm'), ('Bow'), ('Catalyst');
 
 -- Initial admin user (password: admin123)
 INSERT INTO users (username, email, password, role) VALUES ('Admin', 'admin@genshin.com', '$2a$10$siA90oLux4j8b9taVGCl3eCwC1jDOc8XjWgMZy7ytIzEXNr9W0KiG', 'admin');

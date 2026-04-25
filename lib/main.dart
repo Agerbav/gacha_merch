@@ -22,12 +22,6 @@ class GenshinImportApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // UI Theme Customizations:
-    // 1. Font Family (custom via default theme)
-    // 2. Background Color (Scaffold background)
-    // 3. Tint (Primary Color)
-    // 4. Content Mode (via card themes/button styles)
-    
     return MaterialApp(
       title: 'Teyvat Market',
       debugShowCheckedModeBanner: false,

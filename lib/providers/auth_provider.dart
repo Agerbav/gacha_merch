@@ -31,7 +31,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error loading user: $e');
+      // Handle error
     }
   }
 
@@ -56,7 +56,7 @@ class AuthProvider with ChangeNotifier {
     try {
       final res = await ApiService.register(username, email, password);
       if (res['message'] == 'User registered') {
-        return null; // Success
+        return null;
       }
       return res['message'] ?? 'Registration failed';
     } catch (e) {
@@ -66,27 +66,20 @@ class AuthProvider with ChangeNotifier {
 
   Future<String?> signInWithGoogle() async {
     try {
-      debugPrint('Starting Google Sign-In...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        debugPrint('Google Sign-In cancelled by user.');
         return 'Google sign in cancelled';
       }
 
-      debugPrint('Getting Google Authentication for: ${googleUser.email}');
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
       final String? accessToken = googleAuth.accessToken;
-
-      debugPrint('Google Auth Response: idToken=${idToken != null ? "present (${idToken.length} chars)" : "NULL"}, accessToken=${accessToken != null ? "present" : "NULL"}');
 
       if (idToken == null && accessToken == null) {
         return 'Failed to get authentication tokens from Google.';
       }
 
-      debugPrint('Calling backend googleLogin with: idToken=${idToken != null ? "YES" : "NO"}, accessToken=${accessToken != null ? "YES" : "NO"}');
       final res = await ApiService.googleLogin(idToken, accessToken);
-      debugPrint('Backend Response: $res');
       
       if (res['token'] != null) {
         _user = User.fromJson(res['user'], token: res['token']);
@@ -105,18 +98,17 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     try {
       _user = null;
-      // Google logout can fail if not configured for web, wrap it
       try {
         await _googleSignIn.signOut();
       } catch (e) {
-        debugPrint('Google sign out error: $e');
+        // Handle error
       }
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
       notifyListeners();
     } catch (e) {
-      debugPrint('Logout error: $e');
+      // Handle error
     }
   }
 }
