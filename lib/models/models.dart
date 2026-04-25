@@ -9,8 +9,8 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json, {String? token}) {
     return User(
-      id: json['id'],
-      username: json['username'],
+      id: json['id'] ?? 0,
+      username: json['username'] ?? 'User',
       email: json['email'] ?? '',
       role: json['role'] ?? 'user',
       token: token,
@@ -26,8 +26,8 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'],
-      name: json['name'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
     );
   }
 }
@@ -55,14 +55,14 @@ class Weapon {
 
   factory Weapon.fromJson(Map<String, dynamic> json) {
     return Weapon(
-      id: json['id'],
-      name: json['name'],
-      type: json['category_name'] ?? json['type'] ?? '',
+      id: json['id'] ?? 0,
+      name: json['name'] ?? 'Unknown Weapon',
+      type: json['category_name'] ?? json['type'] ?? 'General',
       categoryId: json['category_id'] ?? 0,
       description: json['description'] ?? '',
-      stock: json['stock'],
+      stock: json['stock'] ?? 0,
       image: json['image'] ?? '',
-      price: double.parse(json['price'].toString()),
+      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
     );
   }
 

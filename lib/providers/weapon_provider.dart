@@ -9,10 +9,46 @@ class WeaponProvider with ChangeNotifier {
   final Map<int, int> _cart = {}; // weaponId -> quantity
   bool _isLoading = false;
 
-  List<Weapon> get weapons => _weapons;
+  // Filter state
+  String _searchQuery = '';
+  int? _selectedCategoryId;
+  double? _minPrice;
+  double? _maxPrice;
+
+  List<Weapon> get weapons {
+    return _weapons.where((w) {
+      final matchesName = w.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesCategory = _selectedCategoryId == null || w.categoryId == _selectedCategoryId;
+      final matchesMinPrice = _minPrice == null || w.price >= _minPrice!;
+      final matchesMaxPrice = _maxPrice == null || w.price <= _maxPrice!;
+      return matchesName && matchesCategory && matchesMinPrice && matchesMaxPrice;
+    }).toList();
+  }
+
   List<Category> get categories => _categories;
   Map<int, int> get cart => _cart;
   bool get isLoading => _isLoading;
+
+  void setFilters({String? query, int? categoryId, double? minPrice, double? maxPrice}) {
+    if (query != null) _searchQuery = query;
+    _selectedCategoryId = categoryId;
+    _minPrice = minPrice;
+    _maxPrice = maxPrice;
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _searchQuery = '';
+    _selectedCategoryId = null;
+    _minPrice = null;
+    _maxPrice = null;
+    notifyListeners();
+  }
+
+  String get searchQuery => _searchQuery;
+  int? get selectedCategoryId => _selectedCategoryId;
+  double? get minPrice => _minPrice;
+  double? get maxPrice => _maxPrice;
 
   double get cartTotal {
     double total = 0;

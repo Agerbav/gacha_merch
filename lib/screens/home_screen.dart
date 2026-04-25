@@ -84,7 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
           : RefreshIndicator(
               key: const ValueKey('content'),
               onRefresh: () => weaponProv.fetchWeapons(),
-              child: GridView.builder(
+              child: weaponProv.weapons.isEmpty 
+                ? const Center(child: Text('No weapons found matching your criteria'))
+                : GridView.builder(
               padding: const EdgeInsets.all(16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, 
@@ -232,6 +234,137 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showFilterDialog(context),
+        backgroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.primary,
+        elevation: 4,
+        child: const Icon(Icons.filter_list_rounded),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  void _showFilterDialog(BuildContext context) {
+    final weaponProv = context.read<WeaponProvider>();
+    final nameController = TextEditingController(text: weaponProv.searchQuery);
+    final minPriceController = TextEditingController(text: weaponProv.minPrice?.toString() ?? '');
+    final maxPriceController = TextEditingController(text: weaponProv.maxPrice?.toString() ?? '');
+    int? selectedCatId = weaponProv.selectedCategoryId;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Filter Weapons', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                  TextButton(
+                    onPressed: () {
+                      weaponProv.clearFilters();
+                      Navigator.pop(context);
+                    }, 
+                    child: const Text('Clear All')
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Search by Name',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('Price Range', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: minPriceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Min Price',
+                        prefixIcon: const Icon(Icons.attach_money_rounded),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: maxPriceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Max Price',
+                        prefixIcon: const Icon(Icons.attach_money_rounded),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text('Category', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilterChip(
+                    label: const Text('All'),
+                    selected: selectedCatId == null,
+                    onSelected: (v) => setModalState(() => selectedCatId = null),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  ...weaponProv.categories.map((cat) => FilterChip(
+                    label: Text(cat.name),
+                    selected: selectedCatId == cat.id,
+                    onSelected: (v) => setModalState(() => selectedCatId = v ? cat.id : null),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  )),
+                ],
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    weaponProv.setFilters(
+                      query: nameController.text,
+                      categoryId: selectedCatId,
+                      minPrice: double.tryParse(minPriceController.text),
+                      maxPrice: double.tryParse(maxPriceController.text),
+                    );
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Apply Filters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
