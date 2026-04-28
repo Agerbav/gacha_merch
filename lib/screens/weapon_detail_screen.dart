@@ -43,9 +43,6 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final weaponProv = context.watch<WeaponProvider>();
-    // If the weapon was updated, it might have been replaced in the provider.
-    // However, since we passed it in, we'll just use the widget.weapon for now.
-    // To be safer, we could find the latest version from the provider.
     final currentWeapon = weaponProv.weapons.firstWhere((w) => w.id == widget.weapon.id, orElse: () => widget.weapon);
 
     return Scaffold(
@@ -150,7 +147,7 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
                       height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 120), // Spacing for bottom button
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
