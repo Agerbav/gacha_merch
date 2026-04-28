@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/weapon_provider.dart';
+import '../widgets/weapon_image.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -161,12 +162,11 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               width: 48,
               height: 48,
               decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12)),
-              child: weapon.image.isNotEmpty 
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(weapon.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.shield, color: Colors.grey)),
-                  )
-                : const Icon(Icons.shield, color: Colors.grey),
+              child: WeaponImage(
+                imageUrl: weapon.image,
+                borderRadius: BorderRadius.circular(12),
+                iconSize: 24,
+              ),
             ),
             title: Text(weapon.name, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(
@@ -388,8 +388,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                           child: _imagePreviewBytes != null
                               ? ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.memory(_imagePreviewBytes!, fit: BoxFit.cover))
                               : weapon != null && weapon.image.isNotEmpty
-                                  ? ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.network(weapon.image, fit: BoxFit.cover))
+                                  ? WeaponImage(imageUrl: weapon.image, borderRadius: BorderRadius.circular(16), iconSize: 40)
                                   : Column(
+
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.add_a_photo_outlined, color: Colors.grey.shade600),

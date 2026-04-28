@@ -7,6 +7,8 @@ import 'weapon_detail_screen.dart';
 import 'cart_screen.dart';
 import 'admin_screen.dart';
 
+import '../widgets/weapon_image.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -133,18 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 child: Hero(
                                   tag: 'weapon-${weapon.id}',
-                                  child: ClipRRect(
+                                  child: WeaponImage(
+                                    imageUrl: weapon.image,
                                     borderRadius: BorderRadius.circular(20),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: weapon.image.isNotEmpty 
-                                        ? Image.network(
-                                            weapon.image, 
-                                            fit: BoxFit.cover, 
-                                            errorBuilder: (_, __, ___) => Icon(Icons.shield_moon_outlined, size: 48, color: Colors.grey.shade400)
-                                          )
-                                        : Icon(Icons.shield_moon_outlined, size: 48, color: Colors.grey.shade400),
-                                    ),
                                   ),
                                 ),
                               ),

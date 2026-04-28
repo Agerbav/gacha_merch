@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/weapon_provider.dart';
+import '../widgets/weapon_image.dart';
 
 class WeaponDetailScreen extends StatefulWidget {
   final Weapon weapon;
@@ -66,14 +67,12 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
               child: Center(
                 child: Hero(
                   tag: 'weapon-${currentWeapon.id}',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: currentWeapon.image.isNotEmpty 
-                      ? ClipRRect(
-                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
-                          child: Image.network(currentWeapon.image, width: double.infinity, height: 400, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.shield, size: 160, color: Colors.grey.shade300)),
-                        )
-                      : Icon(Icons.shield, size: 160, color: Colors.grey.shade300),
+                  child: WeaponImage(
+                    imageUrl: currentWeapon.image,
+                    width: double.infinity,
+                    height: 400,
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+                    iconSize: 100,
                   ),
                 ),
               ),

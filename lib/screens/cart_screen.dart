@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
 import '../providers/weapon_provider.dart';
+import '../providers/auth_provider.dart';
+import '../widgets/weapon_image.dart';
 
 class CartScreen extends StatelessWidget {
+
   const CartScreen({super.key});
 
   @override
@@ -82,9 +84,12 @@ class CartScreen extends StatelessWidget {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(18),
-                                  child: weapon.image.isNotEmpty 
-                                    ? Image.network(weapon.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.shield, color: Colors.grey))
-                                    : const Icon(Icons.shield, color: Colors.grey),
+                                  child: WeaponImage(
+                                  imageUrl: weapon.image,
+                                  fit: BoxFit.cover,
+                                  borderRadius: BorderRadius.circular(12),
+                                  iconSize: 24,
+                                ),
                                 ),
                               ),
                               const SizedBox(width: 16),
