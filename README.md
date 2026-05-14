@@ -1,16 +1,57 @@
-# gacha_merch
+# Gacha Merch
 
-A new Flutter project.
+A Flutter application for browsing and buying Genshin Impact weapons.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- [Flutter SDK](https://docs.flutter.dev/get-started/install)
+- [Node.js](https://nodejs.org/)
+- [MySQL](https://www.mysql.com/)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Database Setup
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Make sure your MySQL server is running.
+2. Run the `database.sql` script to create the database and tables:
+   ```bash
+   mysql -u root -p < database.sql
+   ```
+
+### Server Setup
+
+1. Navigate to the server directory:
+   ```bash
+   cd server
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Configure environment variables:
+   - Copy `.env` file (already provided with placeholders) and fill in your details:
+     - `JWT_SECRET`: A secret key for JWT tokens.
+     - `GOOGLE_CLIENT_ID`: Your Google OAuth client ID.
+4. **Important**: Run the seed script to populate the database with categories and initial data before starting the server:
+   ```bash
+   npm run seed
+   ```
+5. Start the server:
+   ```bash
+   npm start
+   ```
+   The server will run on `http://localhost:3000`.
+
+### Flutter Setup
+
+1. Navigate back to the project root.
+2. Run the Flutter app on web using port 5000:
+   ```bash
+   flutter run -d chrome --web-port 5000
+   ```
+
+## Project Structure
+
+- `lib/`: Flutter application source code.
+- `server/`: Express.js backend source code.
+- `database.sql`: MySQL database schema.
