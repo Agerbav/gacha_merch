@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "gacha_merch",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gacha_merch (Release Mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "gacha_merch (Web Port 5000)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--web-port",
+                "5000"
+            ]
+        }
+    ]
+}

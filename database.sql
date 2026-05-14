@@ -45,17 +45,3 @@ CREATE TABLE IF NOT EXISTS transaction_items (
     FOREIGN KEY (transaction_id) REFERENCES transactions(id),
     FOREIGN KEY (weapon_id) REFERENCES weapons(id)
 );
-
--- Categories
-INSERT IGNORE INTO categories (name) VALUES ('Sword'), ('Claymore'), ('Polearm'), ('Bow'), ('Catalyst');
-
--- Weapons
-INSERT IGNORE INTO weapons (name, category_id, description, stock, price, image) VALUES 
-('Mistsplitter Reforged', 1, 'Violet sword.', 10, 199.99, 'https://static.wikia.nocookie.net/gensin-impact/images/2/21/Weapon_Mistsplitter_Reforged.png'),
-('Wolf\'s Gravestone', 2, 'Wolf Knight longsword.', 5, 189.99, 'https://static.wikia.nocookie.net/gensin-impact/images/0/03/Weapon_Wolf%27s_Gravestone.png'),
-('Staff of Homa', 3, 'Ritual staff.', 8, 199.99, 'https://static.wikia.nocookie.net/gensin-impact/images/1/17/Weapon_Staff_of_Homa.png'),
-('Aqua Simulacra', 4, 'Unpredictable longbow.', 12, 179.99, 'https://static.wikia.nocookie.net/gensin-impact/images/1/1e/Weapon_Aqua_Simulacra.png'),
-('Kagura\'s Verity', 5, 'Kagura Dance bells.', 7, 189.99, 'https://static.wikia.nocookie.net/gensin-impact/images/d/db/Weapon_Kagura%27s_Verity.png');
-
--- Admin user (admin123)
-INSERT INTO users (username, email, password, role) VALUES ('Admin', 'admin@genshin.com', '$2a$10$siA90oLux4j8b9taVGCl3eCwC1jDOc8XjWgMZy7ytIzEXNr9W0KiG', 'admin');

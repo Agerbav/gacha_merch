@@ -45,13 +45,16 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
   Widget build(BuildContext context) {
     final weaponProv = context.watch<WeaponProvider>();
     final currentWeapon = weaponProv.weapons.firstWhere((w) => w.id == widget.weapon.id, orElse: () => widget.weapon);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.background,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -61,7 +64,7 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
               height: 400,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: isDark ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
               ),
               child: Center(
@@ -98,13 +101,13 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.amber.shade50,
+                                color: isDark ? Colors.amber.withOpacity(0.1) : Colors.amber.shade50,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 currentWeapon.type.toUpperCase(),
                                 style: TextStyle(
-                                  color: Colors.amber.shade900, 
+                                  color: isDark ? Colors.amber.shade300 : Colors.amber.shade900, 
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
                                   letterSpacing: 1,
@@ -118,7 +121,7 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
                         '\$${currentWeapon.price}', 
                         style: TextStyle(
                           fontSize: 28, 
-                          color: Theme.of(context).colorScheme.primary, 
+                          color: colorScheme.primary, 
                           fontWeight: FontWeight.w900
                         )
                       ),
@@ -127,9 +130,19 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
                   const SizedBox(height: 32),
                   Row(
                     children: [
-                      _buildInfoChip(Icons.inventory_2_outlined, '${currentWeapon.stock} in stock', currentWeapon.stock > 0 ? Colors.green : Colors.red),
+                      _buildInfoChip(
+                        Icons.inventory_2_outlined, 
+                        '${currentWeapon.stock} in stock', 
+                        currentWeapon.stock > 0 ? Colors.green : Colors.red,
+                        isDark,
+                      ),
                       const SizedBox(width: 12),
-                      _buildInfoChip(Icons.star_outline_rounded, 'Legendary', Colors.blue),
+                      _buildInfoChip(
+                        Icons.star_outline_rounded, 
+                        'Legendary', 
+                        Colors.blue,
+                        isDark,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -142,7 +155,7 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
                     currentWeapon.description,
                     style: TextStyle(
                       fontSize: 16, 
-                      color: Colors.grey.shade700,
+                      color: isDark ? Colors.white70 : Colors.grey.shade700,
                       height: 1.6,
                     ),
                   ),
@@ -157,9 +170,13 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
         builder: (context, auth, _) => Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))
+              BoxShadow(
+                color: isDark ? Colors.black45 : Colors.black.withOpacity(0.05), 
+                blurRadius: 20, 
+                offset: const Offset(0, -5)
+              )
             ],
           ),
           child: SafeArea(
@@ -169,7 +186,8 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
                   icon: const Icon(Icons.edit_rounded),
                   label: const Text('Edit Weapon Details'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueGrey.shade800,
+                    backgroundColor: isDark ? colorScheme.primaryContainer : Colors.blueGrey.shade800,
+                    foregroundColor: isDark ? colorScheme.onPrimaryContainer : Colors.white,
                   ),
                 )
               : ElevatedButton(
@@ -260,18 +278,18 @@ class _WeaponDetailScreenState extends State<WeaponDetailScreen> {
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String label, Color color) {
+  Widget _buildInfoChip(IconData icon, String label, Color color, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(isDark ? 0.2 : 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: color),
+          Icon(icon, size: 16, color: isDark ? color.withOpacity(0.9) : color),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(label, style: TextStyle(color: isDark ? color.withOpacity(0.9) : color, fontWeight: FontWeight.bold, fontSize: 12)),
         ],
       ),
     );

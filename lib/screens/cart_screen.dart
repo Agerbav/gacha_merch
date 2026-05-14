@@ -5,18 +5,20 @@ import '../providers/auth_provider.dart';
 import '../widgets/weapon_image.dart';
 
 class CartScreen extends StatelessWidget {
-
   const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final weaponProv = context.watch<WeaponProvider>();
     final auth = context.read<AuthProvider>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     final cartItems = weaponProv.cart.entries.toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
         title: const Text('Shopping Bag', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
@@ -29,17 +31,24 @@ class CartScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.shopping_bag_outlined, size: 64, color: Colors.grey.shade400),
+                    child: Icon(Icons.shopping_bag_outlined, 
+                      size: 64, 
+                      color: isDark ? Colors.white30 : Colors.grey.shade400
+                    ),
                   ),
                   const SizedBox(height: 24),
                   const Text('Your bag is empty', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Text('Looks like you haven\'t added\nany legendary weapons yet.', 
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5)
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: isDark ? Colors.white60 : Colors.grey.shade600, 
+                      height: 1.5
+                    )
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
@@ -65,10 +74,14 @@ class CartScreen extends StatelessWidget {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 8)),
+                            BoxShadow(
+                              color: isDark ? Colors.black26 : Colors.black.withOpacity(0.03), 
+                              blurRadius: 15, 
+                              offset: const Offset(0, 8)
+                            ),
                           ],
                         ),
                         child: Padding(
@@ -79,7 +92,7 @@ class CartScreen extends StatelessWidget {
                                 width: 90,
                                 height: 90,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F5F7),
+                                  color: isDark ? Colors.white.withOpacity(0.03) : const Color(0xFFF5F5F7),
                                   borderRadius: BorderRadius.circular(18),
                                 ),
                                 child: ClipRRect(
@@ -106,7 +119,11 @@ class CartScreen extends StatelessWidget {
                                     const SizedBox(height: 4),
                                     Text(
                                       weapon.type,
-                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+                                      style: TextStyle(
+                                        fontSize: 12, 
+                                        color: isDark ? Colors.white60 : Colors.grey.shade500, 
+                                        fontWeight: FontWeight.w600
+                                      ),
                                     ),
                                     const SizedBox(height: 8),
                                     Row(
@@ -114,12 +131,16 @@ class CartScreen extends StatelessWidget {
                                       children: [
                                         Text(
                                           '\$${weapon.price}',
-                                          style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w900, fontSize: 16),
+                                          style: TextStyle(
+                                            color: colorScheme.primary, 
+                                            fontWeight: FontWeight.w900, 
+                                            fontSize: 16
+                                          ),
                                         ),
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: Colors.grey.shade50,
+                                            color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade50,
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Text(
@@ -136,7 +157,10 @@ class CartScreen extends StatelessWidget {
                               IconButton(
                                 icon: Container(
                                   padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(color: Colors.red.withOpacity(0.05), shape: BoxShape.circle),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withOpacity(isDark ? 0.1 : 0.05), 
+                                    shape: BoxShape.circle
+                                  ),
                                   child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
                                 ),
                                 onPressed: () => weaponProv.removeFromCart(weapon.id),
@@ -151,10 +175,14 @@ class CartScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))
+                      BoxShadow(
+                        color: isDark ? Colors.black45 : Colors.black.withOpacity(0.05), 
+                        blurRadius: 20, 
+                        offset: const Offset(0, -5)
+                      )
                     ],
                   ),
                   child: SafeArea(
@@ -164,26 +192,50 @@ class CartScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Subtotal', style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
-                            Text('\$${weaponProv.cartTotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text(
+                              'Subtotal', 
+                              style: TextStyle(
+                                fontSize: 16, 
+                                color: isDark ? Colors.white60 : Colors.grey.shade600, 
+                                fontWeight: FontWeight.w500
+                              )
+                            ),
+                            Text(
+                              '\$${weaponProv.cartTotal.toStringAsFixed(2)}', 
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Shipping', style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
-                            const Text('FREE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
+                            Text(
+                              'Shipping', 
+                              style: TextStyle(
+                                fontSize: 16, 
+                                color: isDark ? Colors.white60 : Colors.grey.shade600, 
+                                fontWeight: FontWeight.w500
+                              )
+                            ),
+                            const Text(
+                              'FREE', 
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)
+                            ),
                           ],
                         ),
-                        const Divider(height: 40),
+                        Divider(height: 40, color: isDark ? Colors.white12 : null),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Total Bill', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
                             Text(
                               '\$${weaponProv.cartTotal.toStringAsFixed(2)}',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.primary),
+                              style: TextStyle(
+                                fontSize: 24, 
+                                fontWeight: FontWeight.w900, 
+                                color: colorScheme.primary
+                              ),
                             ),
                           ],
                         ),
@@ -215,7 +267,7 @@ class CartScreen extends StatelessWidget {
                             minimumSize: const Size(double.infinity, 60),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                             elevation: 4,
-                            shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            shadowColor: colorScheme.primary.withOpacity(0.3),
                           ),
                           child: const Text('Confirm Order', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         ),
