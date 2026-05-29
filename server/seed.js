@@ -19,7 +19,7 @@ async function seed() {
         });
 
         // 2. Seed Admin User
-        const adminEmail = 'admin@genshin.com';
+        const adminEmail = 'admin@gmail.com';
         const [adminRows] = await db.execute('SELECT id FROM users WHERE email = ?', [adminEmail]);
         if (adminRows.length === 0) {
             const hashedPassword = await bcrypt.hash('admin123', 10);

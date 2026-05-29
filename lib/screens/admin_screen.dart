@@ -154,6 +154,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       itemCount: weaponProv.weapons.length,
       itemBuilder: (context, i) {
         final weapon = weaponProv.weapons[i];
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
@@ -161,7 +162,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             leading: Container(
               width: 48,
               height: 48,
-              decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade50, 
+                borderRadius: BorderRadius.circular(12)
+              ),
               child: WeaponImage(
                 imageUrl: weapon.image,
                 borderRadius: BorderRadius.circular(12),
@@ -182,7 +186,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                       'Stock: ${weapon.stock}',
                       style: TextStyle(
                         fontSize: 12, 
-                        color: weapon.stock < 5 ? Colors.red : Colors.grey.shade600,
+                        color: weapon.stock < 5 ? Colors.red : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
                         fontWeight: weapon.stock < 5 ? FontWeight.bold : FontWeight.normal
                       ),
                     ),
@@ -209,12 +213,13 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       itemCount: weaponProv.categories.length,
       itemBuilder: (context, i) {
         final cat = weaponProv.categories[i];
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFFF5F5F5),
-              child: Icon(Icons.category_outlined, size: 20, color: Colors.blueGrey),
+            leading: CircleAvatar(
+              backgroundColor: isDark ? Colors.white.withOpacity(0.05) : const Color(0xFFF5F5F5),
+              child: Icon(Icons.category_outlined, size: 20, color: isDark ? Colors.blue.shade300 : Colors.blueGrey),
             ),
             title: Text(cat.name, style: const TextStyle(fontWeight: FontWeight.bold)),
             trailing: Row(
@@ -290,13 +295,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             TextFormField(
               controller: _newCategoryController,
               autofocus: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Category Name',
                 hintText: 'e.g. Scythe',
-                prefixIcon: const Icon(Icons.edit_note_rounded),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                prefixIcon: Icon(Icons.edit_note_rounded),
               ),
             ),
           ],
@@ -330,142 +332,144 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-          title: Row(
-            children: [
-              Icon(weapon == null ? Icons.add_circle_outline : Icons.edit_note_rounded, color: Theme.of(context).primaryColor),
-              const SizedBox(width: 12),
-              Text(weapon == null ? 'New Weapon' : 'Edit Weapon', style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          content: Form(
-            key: _formKey,
-            child: SizedBox(
-              width: 400,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Material(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(16),
-                      child: InkWell(
-                        onTap: () async {
-                          try {
-                            final ImagePicker picker = ImagePicker();
-                            final XFile? image = await picker.pickImage(
-                              source: ImageSource.gallery,
-                              maxWidth: 1024,
-                              maxHeight: 1024,
-                              imageQuality: 85,
-                            );
-                            
-                            if (image != null) {
-                              final bytes = await image.readAsBytes();
-                              setState(() {
-                                _imageFile = image;
-                                _imagePreviewBytes = bytes;
-                              });
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Could not open file picker: $e'))
-                              );
-                            }
-                          }
-                        },
+        builder: (context, setState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+            title: Row(
+              children: [
+                Icon(weapon == null ? Icons.add_circle_outline : Icons.edit_note_rounded, color: Theme.of(context).primaryColor),
+                const SizedBox(width: 12),
+                Text(weapon == null ? 'New Weapon' : 'Edit Weapon', style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Form(
+              key: _formKey,
+              child: SizedBox(
+                width: 400,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Material(
+                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
+                        child: InkWell(
+                          onTap: () async {
+                            try {
+                              final ImagePicker picker = ImagePicker();
+                              final XFile? image = await picker.pickImage(
+                                source: ImageSource.gallery,
+                                maxWidth: 1024,
+                                maxHeight: 1024,
+                                imageQuality: 85,
+                              );
+                              
+                              if (image != null) {
+                                final bytes = await image.readAsBytes();
+                                setState(() {
+                                  _imageFile = image;
+                                  _imagePreviewBytes = bytes;
+                                });
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Could not open file picker: $e'))
+                                );
+                              }
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            height: 120,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade300),
+                            ),
+                            child: _imagePreviewBytes != null
+                                ? ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.memory(_imagePreviewBytes!, fit: BoxFit.cover))
+                                : weapon != null && weapon.image.isNotEmpty
+                                    ? WeaponImage(imageUrl: weapon.image, borderRadius: BorderRadius.circular(16), iconSize: 40)
+                                    : Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.add_a_photo_outlined, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                                          const SizedBox(height: 8),
+                                          Text('Select Weapon Image', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12)),
+                                        ],
+                                      ),
                           ),
-                          child: _imagePreviewBytes != null
-                              ? ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.memory(_imagePreviewBytes!, fit: BoxFit.cover))
-                              : weapon != null && weapon.image.isNotEmpty
-                                  ? WeaponImage(imageUrl: weapon.image, borderRadius: BorderRadius.circular(16), iconSize: 40)
-                                  : Column(
-
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.add_a_photo_outlined, color: Colors.grey.shade600),
-                                        const SizedBox(height: 8),
-                                        Text('Select Weapon Image', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                                      ],
-                                    ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    TextFormField(
-                      controller: _nameController, 
-                      decoration: _inputDecoration('Weapon Name', Icons.title_rounded),
-                      validator: (v) => v!.isEmpty ? 'Required' : null
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<int>(
-                      value: _selectedCategoryId,
-                      decoration: _inputDecoration('Weapon Type', Icons.category_rounded),
-                      items: weaponProv.categories.map((cat) => DropdownMenuItem(
-                        value: cat.id,
-                        child: Text(cat.name),
-                      )).toList(),
-                      onChanged: (v) => setState(() => _selectedCategoryId = v),
-                      validator: (v) => v == null ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _priceController, 
-                            decoration: _inputDecoration('Price', Icons.attach_money_rounded),
-                            keyboardType: TextInputType.number, 
-                            validator: (v) => double.tryParse(v ?? '') == null ? 'Invalid' : null
+                      const SizedBox(height: 24),
+                      TextFormField(
+                        controller: _nameController, 
+                        decoration: _inputDecoration('Weapon Name', Icons.title_rounded),
+                        validator: (v) => v!.isEmpty ? 'Required' : null
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<int>(
+                        value: _selectedCategoryId,
+                        decoration: _inputDecoration('Weapon Type', Icons.category_rounded),
+                        items: weaponProv.categories.map((cat) => DropdownMenuItem(
+                          value: cat.id,
+                          child: Text(cat.name),
+                        )).toList(),
+                        onChanged: (v) => setState(() => _selectedCategoryId = v),
+                        validator: (v) => v == null ? 'Required' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _priceController, 
+                              decoration: _inputDecoration('Price', Icons.attach_money_rounded),
+                              keyboardType: TextInputType.number, 
+                              validator: (v) => double.tryParse(v ?? '') == null ? 'Invalid' : null
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _stockController, 
-                            decoration: _inputDecoration('Stock', Icons.inventory_2_rounded),
-                            keyboardType: TextInputType.number, 
-                            validator: (v) => int.tryParse(v ?? '') == null ? 'Invalid' : null
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _stockController, 
+                              decoration: _inputDecoration('Stock', Icons.inventory_2_rounded),
+                              keyboardType: TextInputType.number, 
+                              validator: (v) => int.tryParse(v ?? '') == null ? 'Invalid' : null
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _descController, 
-                      decoration: _inputDecoration('Description', Icons.description_rounded),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _descController, 
+                        decoration: _inputDecoration('Description', Icons.description_rounded),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-            ElevatedButton(
-              onPressed: _isLoading ? null : () => _submit(editId: weapon?.id), 
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(140, 48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: _isLoading ? null : () => _submit(editId: weapon?.id), 
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(140, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: _isLoading 
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : Text(weapon == null ? 'Add Weapon' : 'Save Changes'),
               ),
-              child: _isLoading 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : Text(weapon == null ? 'Add Weapon' : 'Save Changes'),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -474,15 +478,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     return InputDecoration(
       labelText: label,
       prefixIcon: Icon(icon, size: 20),
-      filled: true,
-      fillColor: Colors.grey.shade100,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16), 
-        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2)
-      ),
     );
   }
 }
