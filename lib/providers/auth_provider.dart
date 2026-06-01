@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 
@@ -14,9 +15,10 @@ class AuthProvider with ChangeNotifier {
   bool get isAdmin => _user?.role == 'admin';
 
   AuthProvider() {
+    final clientId = dotenv.env['GOOGLE_CLIENT_ID'];
     _googleSignIn = GoogleSignIn(
-      clientId: '293637566492-3upe6b0guabti3vev33noirub0d94add.apps.googleusercontent.com',
-      serverClientId: kIsWeb ? null : '293637566492-3upe6b0guabti3vev33noirub0d94add.apps.googleusercontent.com',
+      clientId: clientId,
+      serverClientId: kIsWeb ? null : clientId,
     );
     _loadUser();
   }
